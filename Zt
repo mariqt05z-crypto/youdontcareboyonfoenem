@@ -1,0 +1,109 @@
+local Player = game.Players.LocalPlayer
+local Backpack = Player.Backpack
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+
+-- Main Frame (Tools Menu)
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 250, 0, 300)
+Frame.Position = UDim2.new(0.5, -125, 0.5, -125)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Frame.BorderSizePixel = 2
+Frame.Parent = ScreenGui
+Frame.Active = true
+Frame.Draggable = true
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Title.Text = "Farm Step 2"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 16
+Title.Parent = Frame
+
+-- Auto Equip & Unequip Toggle Button
+local AutoToggleButton = Instance.new("TextButton")
+AutoToggleButton.Size = UDim2.new(1, -10, 0, 40)
+AutoToggleButton.Position = UDim2.new(0, 5, 0, 140)
+AutoToggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+AutoToggleButton.Text = "Auto Farm Equip (OFF)"
+AutoToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoToggleButton.Font = Enum.Font.SourceSansBold
+AutoToggleButton.TextSize = 14
+AutoToggleButton.Parent = Frame
+
+-- Infinite Yield Button
+local InfiniteYieldButton = Instance.new("TextButton")
+InfiniteYieldButton.Size = UDim2.new(1, -10, 0, 40)
+InfiniteYieldButton.Position = UDim2.new(0, 5, 0, 190)
+InfiniteYieldButton.BackgroundColor3 = Color3.fromRGB(0, 0, 200)
+InfiniteYieldButton.Text = "Infinite Yield Use for Noclip or Use built in"
+InfiniteYieldButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+InfiniteYieldButton.Font = Enum.Font.SourceSansBold
+InfiniteYieldButton.TextSize = 14
+InfiniteYieldButton.Parent = Frame
+
+-- Open/Close Button
+local OpenCloseButton = Instance.new("TextButton")
+OpenCloseButton.Size = UDim2.new(0, 100, 0, 40)
+OpenCloseButton.Position = UDim2.new(0.5, -50, 1, 10)
+OpenCloseButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+OpenCloseButton.Text = "Close"
+OpenCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+OpenCloseButton.Font = Enum.Font.SourceSansBold
+OpenCloseButton.TextSize = 14
+OpenCloseButton.Parent = ScreenGui
+
+-- Infinite Yield Function
+InfiniteYieldButton.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+-- Auto Equip/Unequip Toggle Logic
+local autoToggle = false
+local isEquipping = true
+
+AutoToggleButton.MouseButton1Click:Connect(function()
+    autoToggle = not autoToggle
+    AutoToggleButton.Text = autoToggle and "Auto Farm Equip (ON)" or "Auto Farm Equip (OFF)"
+    AutoToggleButton.BackgroundColor3 = autoToggle and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(0, 150, 255)
+    
+    task.spawn(function()
+        while autoToggle do
+            if isEquipping then
+                for _, tool in pairs(Backpack:GetChildren()) do
+                    if tool:IsA("Tool") then
+                        tool.Parent = Character
+                    end
+                end
+                AutoToggleButton.Text = "Auto Unequip (ON)"
+                AutoToggleButton.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+            else
+                for _, tool in pairs(Character:GetChildren()) do
+                    if tool:IsA("Tool") then
+                        tool.Parent = Backpack
+                    end
+                end
+                AutoToggleButton.Text = "Auto Equip (ON)"
+                AutoToggleButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            end
+            isEquipping = not isEquipping
+            task.wait(1) -- 1 millisecond delay
+        end
+    end)
+end)
+
+-- Open/Close Button Logic (Sliding Animation)
+local isOpen = true
+OpenCloseButton.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    OpenCloseButton.Text = isOpen and "Close" or "Open"
+    
+    local targetPos = isOpen and UDim2.new(0.5, -125, 0.5, -125) or UDim2.new(0.5, -125, 1.5, -125)
+    local tween = game:GetService("TweenService"):Create(Frame, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Position = targetPos})
+    tween:Play()
+end)
